@@ -182,6 +182,11 @@ npm run dev
 
 2. Tạo một sự kiện test để kiểm tra kết nối Firebase
 3. Kiểm tra Firestore Console để xem dữ liệu đã được lưu chưa
+4. deploy
+```bash
+   npm run build
+   firebase deploy --only hosting
+```
 
 ## Troubleshooting
 
