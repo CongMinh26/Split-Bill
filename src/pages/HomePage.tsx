@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import EventForm from '../components/EventForm';
+import ThemeToggle from '../components/ThemeToggle';
 
 export default function HomePage() {
   const navigate = useNavigate();
@@ -36,11 +37,12 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+      <ThemeToggle />
       <div className="max-w-4xl mx-auto px-4">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">Split Bill</h1>
-          <p className="text-gray-600">Ứng dụng chia tiền thông minh cho nhóm</p>
+          <h1 className="text-4xl font-bold text-gray-800 dark:text-gray-100 mb-2">Split Bill</h1>
+          <p className="text-gray-600 dark:text-gray-400">Ứng dụng chia tiền thông minh cho nhóm</p>
         </div>
 
         {!showForm && !showJoinForm && (
@@ -67,11 +69,11 @@ export default function HomePage() {
         )}
 
         {showJoinForm && (
-          <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-2xl font-bold mb-4 text-gray-800">Tham gia sự kiện</h2>
+          <div className="max-w-md mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+            <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-100">Tham gia sự kiện</h2>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Mã truy cập
                 </label>
                 <input
@@ -81,13 +83,13 @@ export default function HomePage() {
                     setAccessCode(e.target.value.toUpperCase());
                     setJoinError('');
                   }}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent uppercase"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent uppercase"
                   placeholder="Nhập mã truy cập (ví dụ: ABC123)"
                   maxLength={6}
                 />
               </div>
               {joinError && (
-                <div className="p-3 bg-red-100 text-red-700 rounded-md text-sm">
+                <div className="p-3 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200 rounded-md text-sm">
                   {joinError}
                 </div>
               )}
@@ -104,7 +106,7 @@ export default function HomePage() {
                     setAccessCode('');
                     setJoinError('');
                   }}
-                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
+                  className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600"
                 >
                   Hủy
                 </button>
@@ -119,7 +121,7 @@ export default function HomePage() {
               onClick={() => {
                 setShowForm(false);
               }}
-              className="mb-4 px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
+              className="mb-4 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600"
             >
               ← Quay lại
             </button>

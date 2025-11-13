@@ -1,45 +1,32 @@
 import { useState, useEffect } from 'react';
-import { createExpense } from '../services/expenseService';
-import type { Event } from '../types';
+import { updateExpense } from '../services/expenseService';
+import type { Event, Expense } from '../types';
 
-interface ExpenseFormProps {
+interface EditExpenseFormProps {
   event: Event;
+  expense: Expense;
   onSuccess?: () => void;
+  onCancel?: () => void;
 }
 
-export default function ExpenseForm({ event, onSuccess }: ExpenseFormProps) {
-  const [name, setName] = useState('');
+export default function EditExpenseForm({ event, expense, onSuccess, onCancel }: EditExpenseFormProps) {
+  const [name, setName] = useState(expense.name);
   const [amount, setAmount] = useState('');
-  const [paidBy, setPaidBy] = useState('');
-  const [splitBetween, setSplitBetween] = useState<string[]>([]);
-  const [splitAll, setSplitAll] = useState(true);
+  const [paidBy, setPaidBy] = useState(expense.paidBy);
+  const [splitBetween, setSplitBetween] = useState<string[]>(expense.splitBetween);
+  const [splitAll, setSplitAll] = useState(expense.splitBetween.length === event.members.length);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Khởi tạo paidBy và splitBetween khi component mount
   useEffect(() => {
-    if (event.members.length > 0 && !paidBy) {
-      setPaidBy(event.members[0]);
-      if (splitAll) {
-        setSplitBetween([...event.members]);
-      }
-    }
-  }, [event.members, paidBy, splitAll]);
-
-  // Cập nhật splitBetween khi splitAll thay đổi
-  useEffect(() => {
-    if (splitAll) {
-      setSplitBetween([...event.members]);
-    } else {
-      setSplitBetween([]);
-    }
-  }, [splitAll, event.members]);
+    // Format số tiền ban đầu
+    const formattedAmount = expense.amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    setAmount(formattedAmount);
+  }, [expense]);
 
   // Format số với dấu phẩy ngăn cách hàng nghìn
   const formatNumber = (value: string): string => {
-    // Loại bỏ tất cả ký tự không phải số
     const numericValue = value.replace(/\D/g, '');
-    // Format với dấu phẩy
     return numericValue.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   };
 
@@ -50,10 +37,16 @@ export default function ExpenseForm({ event, onSuccess }: ExpenseFormProps) {
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value;
-    // Format số khi người dùng nhập
     const formatted = formatNumber(inputValue);
     setAmount(formatted);
   };
+
+  // Cập nhật splitBetween khi splitAll thay đổi
+  useEffect(() => {
+    if (splitAll) {
+      setSplitBetween([...event.members]);
+    }
+  }, [splitAll, event.members]);
 
   const handleSplitToggle = (member: string) => {
     if (splitAll) {
@@ -78,7 +71,6 @@ export default function ExpenseForm({ event, onSuccess }: ExpenseFormProps) {
       return;
     }
 
-    // Parse số từ string có dấu phẩy
     const numAmount = parseNumber(amount);
     if (!numAmount || numAmount <= 0) {
       setError('Vui lòng nhập số tiền hợp lệ');
@@ -97,19 +89,18 @@ export default function ExpenseForm({ event, onSuccess }: ExpenseFormProps) {
 
     setLoading(true);
     try {
-      await createExpense(event.id, name.trim(), numAmount, paidBy, splitBetween);
-      // Reset form
-      setName('');
-      setAmount('');
-      setPaidBy(event.members[0]);
-      setSplitAll(true);
-      setSplitBetween([...event.members]);
+      await updateExpense(expense.id, {
+        name: name.trim(),
+        amount: numAmount,
+        paidBy,
+        splitBetween,
+      });
       
       if (onSuccess) {
         onSuccess();
       }
     } catch (err) {
-      setError('Có lỗi xảy ra khi thêm chi phí');
+      setError('Có lỗi xảy ra khi cập nhật chi phí');
       console.error(err);
     } finally {
       setLoading(false);
@@ -122,8 +113,8 @@ export default function ExpenseForm({ event, onSuccess }: ExpenseFormProps) {
     : event.members;
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-      <h3 className="text-xl font-bold mb-4 text-gray-800 dark:text-gray-100">Thêm khoản chi</h3>
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border-2 border-blue-500">
+      <h3 className="text-xl font-bold mb-4 text-gray-800 dark:text-gray-100">Sửa khoản chi</h3>
       
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
@@ -209,13 +200,24 @@ export default function ExpenseForm({ event, onSuccess }: ExpenseFormProps) {
           <div className="p-3 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200 rounded-md text-sm">{error}</div>
         )}
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
-        >
-          {loading ? 'Đang lưu...' : 'Lưu'}
-        </button>
+        <div className="flex gap-2">
+          <button
+            type="submit"
+            disabled={loading}
+            className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+          >
+            {loading ? 'Đang lưu...' : 'Lưu thay đổi'}
+          </button>
+          {onCancel && (
+            <button
+              type="button"
+              onClick={onCancel}
+              className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600"
+            >
+              Hủy
+            </button>
+          )}
+        </div>
       </form>
     </div>
   );

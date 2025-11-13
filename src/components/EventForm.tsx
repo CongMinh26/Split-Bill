@@ -132,40 +132,40 @@ export default function EventForm({ onSuccess }: EventFormProps) {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-6 text-gray-800">Tạo sự kiện mới</h2>
+    <div className="max-w-2xl mx-auto p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+      <h2 className="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-100">Tạo sự kiện mới</h2>
       
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Tên người tạo *
           </label>
           <input
             type="text"
             value={createdBy}
             onChange={(e) => setCreatedBy(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="Nhập tên của bạn"
             required
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Tên sự kiện *
           </label>
           <input
             type="text"
             value={eventName}
             onChange={(e) => setEventName(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="Ví dụ: Chuyến đi Vũng Tàu 3N2Đ"
             required
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Thành viên *
           </label>
           {members.map((member, index) => (
@@ -174,7 +174,7 @@ export default function EventForm({ onSuccess }: EventFormProps) {
                 type="text"
                 value={member}
                 onChange={(e) => handleMemberChange(index, e.target.value)}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder={`Thành viên ${index + 1}`}
               />
               {members.length > 1 && (
@@ -191,7 +191,7 @@ export default function EventForm({ onSuccess }: EventFormProps) {
           <button
             type="button"
             onClick={handleAddMember}
-            className="mt-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
+            className="mt-2 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600"
           >
             + Thêm thành viên
           </button>
@@ -217,24 +217,24 @@ export default function EventForm({ onSuccess }: EventFormProps) {
             }}
             className="mr-2"
           />
-          <label htmlFor="hasFund" className="text-sm font-medium text-gray-700">
+          <label htmlFor="hasFund" className="text-sm font-medium text-gray-700 dark:text-gray-300">
             Tạo quỹ chung cho chuyến đi
           </label>
         </div>
 
         {hasFund && (
-          <div className="ml-6 p-4 bg-gray-50 rounded-md">
-            <h3 className="font-medium text-gray-700 mb-3">Số tiền mỗi người nộp vào quỹ:</h3>
+          <div className="ml-6 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-md">
+            <h3 className="font-medium text-gray-700 dark:text-gray-300 mb-3">Số tiền mỗi người nộp vào quỹ:</h3>
             {members
               .filter((m) => m.trim() !== '')
               .map((member, index) => (
                 <div key={index} className="mb-2">
-                  <label className="block text-sm text-gray-600 mb-1">{member}:</label>
+                  <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">{member}:</label>
                   <input
                     type="number"
                     value={fundContributions[member] || 0}
                     onChange={(e) => handleFundContributionChange(member, e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="0"
                     min="0"
                     required
@@ -245,7 +245,7 @@ export default function EventForm({ onSuccess }: EventFormProps) {
         )}
 
         {error && (
-          <div className="p-3 bg-red-100 text-red-700 rounded-md">{error}</div>
+          <div className="p-3 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200 rounded-md">{error}</div>
         )}
 
         <button
