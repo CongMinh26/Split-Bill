@@ -4,6 +4,7 @@ import { getEventById } from '../services/eventService';
 import type { Event } from '../types';
 import ExpenseForm from '../components/ExpenseForm';
 import ExpenseList from '../components/ExpenseList';
+import MemberQRCodeManager from '../components/MemberQRCodeManager';
 import ThemeToggle from '../components/ThemeToggle';
 
 export default function EventDetailPage() {
@@ -13,6 +14,7 @@ export default function EventDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showExpenseForm, setShowExpenseForm] = useState(false);
+  const [showQRManager, setShowQRManager] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
@@ -119,12 +121,24 @@ export default function EventDetailPage() {
           </div>
         </div>
 
-        <div className="flex gap-4 mb-6">
+        <div className="flex gap-4 mb-6 flex-wrap">
           <button
-            onClick={() => setShowExpenseForm(!showExpenseForm)}
+            onClick={() => {
+              setShowExpenseForm(!showExpenseForm);
+              setShowQRManager(false);
+            }}
             className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium shadow-md"
           >
             {showExpenseForm ? 'Ẩn form' : 'Thêm khoản chi'}
+          </button>
+          <button
+            onClick={() => {
+              setShowQRManager(!showQRManager);
+              setShowExpenseForm(false);
+            }}
+            className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-medium shadow-md"
+          >
+            {showQRManager ? 'Ẩn QR Codes' : 'Quản lý QR Code'}
           </button>
           <button
             onClick={() => navigate(`/event/${eventId}/summary`)}
@@ -133,6 +147,12 @@ export default function EventDetailPage() {
             Xem kết quả
           </button>
         </div>
+
+        {showQRManager && eventId && (
+          <div className="mb-6">
+            <MemberQRCodeManager eventId={eventId} />
+          </div>
+        )}
 
         {showExpenseForm && (
           <div className="mb-6">

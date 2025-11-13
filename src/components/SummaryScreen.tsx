@@ -111,7 +111,6 @@ export default function SummaryScreen({ eventId }: SummaryScreenProps) {
               d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
             />
           </svg>
-          Xuất PDF
         </button>
       </div>
 
@@ -178,18 +177,37 @@ export default function SummaryScreen({ eventId }: SummaryScreenProps) {
           <h3 className="font-semibold text-yellow-800 dark:text-yellow-300 mb-3">
             Các khoản cần thanh toán (đã tối ưu):
           </h3>
-          <ul className="space-y-2">
-            {summary.debts.map((debt, index) => (
-              <li key={index} className="flex justify-between items-center">
-                <span className="text-gray-700 dark:text-gray-300">
-                  <span className="font-medium">{debt.from}</span> cần trả cho{' '}
-                  <span className="font-medium">{debt.to}</span>:
-                </span>
-                <span className="font-bold text-yellow-700 dark:text-yellow-400">
-                  {formatCurrency(debt.amount)} VNĐ
-                </span>
-              </li>
-            ))}
+          <ul className="space-y-4">
+            {summary.debts.map((debt, index) => {
+              const qrCode = event?.memberQRCodes?.[debt.to];
+              return (
+                <li key={index} className="border-b border-yellow-200 dark:border-yellow-700 pb-3 last:border-0 last:pb-0">
+                  <div className="flex justify-between items-start mb-2">
+                    <div className="flex-1">
+                      <span className="text-gray-700 dark:text-gray-300">
+                        <span className="font-medium">{debt.from}</span> cần trả cho{' '}
+                        <span className="font-medium">{debt.to}</span>:
+                      </span>
+                      <span className="ml-2 font-bold text-yellow-700 dark:text-yellow-400">
+                        {formatCurrency(debt.amount)} VNĐ
+                      </span>
+                    </div>
+                  </div>
+                  {qrCode && (
+                    <div className="mt-2 flex items-center gap-2">
+                      <span className="text-xs text-gray-600 dark:text-gray-400">QR Code nhận tiền:</span>
+                      <img
+                        src={qrCode}
+                        alt={`QR code của ${debt.to}`}
+                        className="w-16 h-16 object-cover rounded border border-gray-300 dark:border-gray-600 cursor-pointer hover:opacity-80"
+                        onClick={() => window.open(qrCode, '_blank')}
+                        title="Click để xem lớn"
+                      />
+                    </div>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         </div>
       )}

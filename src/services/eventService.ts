@@ -123,3 +123,26 @@ export async function deleteEvent(eventId: string): Promise<void> {
   await deleteDoc(docRef);
 }
 
+/**
+ * Cập nhật QR code cho thành viên
+ */
+export async function updateMemberQRCode(
+  eventId: string,
+  memberName: string,
+  qrCodeURL: string
+): Promise<void> {
+  const docRef = doc(db, EVENTS_COLLECTION, eventId);
+  const event = await getEventById(eventId);
+  
+  if (!event) {
+    throw new Error('Event not found');
+  }
+
+  const memberQRCodes = event.memberQRCodes || {};
+  memberQRCodes[memberName] = qrCodeURL;
+
+  await updateDoc(docRef, {
+    memberQRCodes,
+  });
+}
+

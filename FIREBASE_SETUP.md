@@ -52,9 +52,60 @@
 
 **Lưu ý**: Indexes có thể mất vài phút để được build. Bạn sẽ nhận được thông báo khi index đã sẵn sàng.
 
-## Bước 5: Cấu hình Security Rules (QUAN TRỌNG - BẮT BUỘC)
+## Bước 5: Cấu hình Cloudinary cho tính năng upload QR code (MIỄN PHÍ)
+
+Ứng dụng sử dụng **Cloudinary** để upload ảnh QR code - dịch vụ miễn phí với free tier hào phóng:
+- 25GB storage
+- 25GB bandwidth/tháng
+- CDN tự động
+- Hỗ trợ resize/optimize ảnh
+
+### Cách setup Cloudinary:
+
+1. **Đăng ký tài khoản miễn phí**
+   - Vào https://cloudinary.com/
+   - Click "Sign Up For Free"
+   - Đăng ký bằng email hoặc Google/GitHub
+
+2. **Lấy Cloud Name**
+   - Sau khi đăng ký, vào Dashboard
+   - Copy **Cloud Name** (hiển thị ở góc trên bên phải)
+
+3. **Tạo Upload Preset (Unsigned)**
+   - Vào **Settings** > **Upload**
+   - Scroll xuống phần **Upload presets**
+   - Click **"Add upload preset"**
+   - Cấu hình:
+     - **Preset name**: `qr-code-upload` (hoặc tên bạn muốn)
+     - **Signing mode**: Chọn **"Unsigned"** (quan trọng!)
+     - **Folder**: `qr-codes` (tùy chọn, để tổ chức file)
+     - **Upload manipulation**: Có thể bật "Auto-format" và "Auto-quality" để tối ưu ảnh
+   - Click **"Save"**
+
+4. **Thêm vào file `.env`**:
+   ```env
+   VITE_CLOUDINARY_CLOUD_NAME=your-cloud-name
+   VITE_CLOUDINARY_UPLOAD_PRESET=qr-code-upload
+   ```
+
+**Lưu ý**: 
+- Cloud Name và Upload Preset là bắt buộc để upload ảnh
+- Upload Preset phải được set là **Unsigned** để upload từ client-side
+
+### Xem ảnh đã upload:
+
+1. Vào **Media Library** trong menu bên trái Cloudinary Dashboard
+2. Tất cả ảnh đã upload sẽ hiển thị ở đây
+3. Nếu đã set folder `qr-codes`, bạn có thể:
+   - Click vào folder `qr-codes` trong sidebar để xem ảnh trong folder đó
+   - Hoặc search theo tên file để tìm ảnh cụ thể
+4. Click vào ảnh để xem chi tiết và copy URL
+
+## Bước 6: Cấu hình Security Rules (QUAN TRỌNG - BẮT BUỘC)
 
 **⚠️ Nếu không cấu hình Security Rules, bạn sẽ gặp lỗi "Missing or insufficient permissions"**
+
+### Firestore Rules:
 
 1. Vào **Firestore Database** > **Rules** trong Firebase Console
 2. Copy và paste rules sau vào editor:
@@ -83,7 +134,7 @@ service cloud.firestore {
 - Cho production, bạn cần rules nghiêm ngặt hơn với xác thực người dùng
 - File `firestore.rules` trong project root chứa rules tương tự để deploy bằng Firebase CLI
 
-## Bước 6: Lấy Firebase Config
+## Bước 7: Lấy Firebase Config
 
 1. Vào **Project Settings** (biểu tượng bánh răng)
 2. Scroll xuống phần "Your apps"
@@ -95,7 +146,7 @@ service cloud.firestore {
    - `messagingSenderId`
    - `appId`
 
-## Bước 7: Cấu hình trong ứng dụng
+## Bước 8: Cấu hình trong ứng dụng
 
 1. Tạo file `.env` trong thư mục root của project:
 ```bash
@@ -111,11 +162,18 @@ VITE_FIREBASE_PROJECT_ID=your-project-id
 VITE_FIREBASE_STORAGE_BUCKET=your-project-id.appspot.com
 VITE_FIREBASE_MESSAGING_SENDER_ID=your-messaging-sender-id
 VITE_FIREBASE_APP_ID=your-app-id
+
+# Cloudinary config cho tính năng upload QR code (miễn phí)
+# Lấy tại: https://cloudinary.com/
+VITE_CLOUDINARY_CLOUD_NAME=your-cloud-name
+VITE_CLOUDINARY_UPLOAD_PRESET=qr-code-upload
 ```
 
-3. Thay thế các giá trị `your-...` bằng giá trị thực tế từ Firebase Console
+3. Thay thế các giá trị `your-...` bằng giá trị thực tế:
+   - Firebase config: Lấy từ Firebase Console
+   - Cloudinary: Lấy Cloud Name và Upload Preset từ Cloudinary Dashboard (xem Bước 5)
 
-## Bước 8: Test ứng dụng
+## Bước 9: Test ứng dụng
 
 1. Chạy ứng dụng:
 ```bash

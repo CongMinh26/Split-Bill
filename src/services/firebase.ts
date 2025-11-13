@@ -1,6 +1,8 @@
 import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
+// Không cần Firebase Storage nữa - sử dụng ImgBB thay thế
+// import { getStorage } from 'firebase/storage';
 
 // Firebase configuration - sẽ được thay thế bằng config thực tế từ Firebase Console
 const firebaseConfig = {
@@ -21,6 +23,9 @@ export const db = getFirestore(app);
 
 // Initialize Auth
 export const auth = getAuth(app);
+
+// Không cần Firebase Storage nữa - sử dụng ImgBB thay thế
+// export const storage = getStorage(app);
 
 export default app;
 

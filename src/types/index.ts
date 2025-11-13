@@ -17,6 +17,7 @@ export interface Event {
   createdAt: Timestamp;
   hasFund: boolean;
   fundContributions?: FundContributions;
+  memberQRCodes?: { [personName: string]: string }; // URL của QR code nhận tiền
 }
 
 export interface Expense {
