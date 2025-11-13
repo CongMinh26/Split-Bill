@@ -4,12 +4,12 @@
 
 ## Tính năng
 
-- ✅ Tạo sự kiện với mã truy cập ngẫu nhiên
-- ✅ Tham gia sự kiện bằng mã truy cập (không cần đăng nhập)
-- ✅ Thêm và quản lý chi phí
-- ✅ Chia tiền công bằng theo người tham gia
-- ✅ Hỗ trợ quỹ chung với tính toán tiền trả lại tự động
-- ✅ Tối ưu hóa nợ để giảm số giao dịch cần thiết
+- Tạo sự kiện với mã truy cập ngẫu nhiên
+- Tham gia sự kiện bằng mã truy cập (không cần đăng nhập)
+- Thêm và quản lý chi phí
+- Chia tiền công bằng theo người tham gia
+- Hỗ trợ quỹ chung với tính toán tiền trả lại tự động
+- Tối ưu hóa nợ để giảm số giao dịch cần thiết
 
 ## Công nghệ sử dụng
 
