@@ -91,6 +91,4 @@ src/
 2. Click "Xem kết quả"
 3. Xem số dư của từng người và các khoản cần thanh toán
 
-## License
-
-MIT
+## Hỗ trợ bởi ChatGPT
