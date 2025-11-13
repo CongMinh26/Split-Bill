@@ -3,7 +3,8 @@ import { getEventById } from '../services/eventService';
 import { getExpensesByEventId } from '../services/expenseService';
 import { calculateBalances, calculateFundRefunds } from '../utils/calculator';
 import { optimizeDebts } from '../utils/debtOptimizer';
-import type { SummaryResult } from '../types';
+import { exportSummaryToPDF } from '../utils/exportPDF';
+import type { SummaryResult, Event } from '../types';
 
 interface SummaryScreenProps {
   eventId: string;
@@ -11,6 +12,7 @@ interface SummaryScreenProps {
 
 export default function SummaryScreen({ eventId }: SummaryScreenProps) {
   const [summary, setSummary] = useState<SummaryResult | null>(null);
+  const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -18,14 +20,16 @@ export default function SummaryScreen({ eventId }: SummaryScreenProps) {
     const loadSummary = async () => {
       try {
         setLoading(true);
-        const event = await getEventById(eventId);
-        if (!event) {
+        const eventData = await getEventById(eventId);
+        if (!eventData) {
           setError('Không tìm thấy sự kiện');
           return;
         }
 
+        setEvent(eventData);
+
         const expenses = await getExpensesByEventId(eventId);
-        const balances = calculateBalances(event, expenses);
+        const balances = calculateBalances(eventData, expenses);
         const debts = optimizeDebts(balances);
         
         // Tính tổng chi phí chuyến đi
@@ -34,8 +38,8 @@ export default function SummaryScreen({ eventId }: SummaryScreenProps) {
         let remainingFund = 0;
         let fundRefunds: { [personName: string]: number } | undefined;
 
-        if (event.hasFund) {
-          const fundData = calculateFundRefunds(event, expenses);
+        if (eventData.hasFund) {
+          const fundData = calculateFundRefunds(eventData, expenses);
           remainingFund = fundData.remainingFund;
           fundRefunds = fundData.fundRefunds;
         }
@@ -44,7 +48,7 @@ export default function SummaryScreen({ eventId }: SummaryScreenProps) {
           balances,
           debts,
           totalExpenses,
-          remainingFund: event.hasFund ? remainingFund : undefined,
+          remainingFund: eventData.hasFund ? remainingFund : undefined,
           fundRefunds,
         });
         setError('');
@@ -63,21 +67,53 @@ export default function SummaryScreen({ eventId }: SummaryScreenProps) {
     return new Intl.NumberFormat('vi-VN').format(amount);
   };
 
+  const handleExportPDF = async () => {
+    if (event && summary) {
+      try {
+        await exportSummaryToPDF(event, summary);
+      } catch (error) {
+        console.error('Error exporting PDF:', error);
+        alert('Có lỗi xảy ra khi xuất PDF. Vui lòng thử lại.');
+      }
+    }
+  };
+
   if (loading) {
-    return <div className="text-center py-8 text-gray-600">Đang tính toán...</div>;
+    return <div className="text-center py-8 text-gray-600 dark:text-gray-400">Đang tính toán...</div>;
   }
 
   if (error) {
-    return <div className="text-center py-8 text-red-600">{error}</div>;
+    return <div className="text-center py-8 text-red-600 dark:text-red-400">{error}</div>;
   }
 
-  if (!summary) {
+  if (!summary || !event) {
     return null;
   }
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Kết quả tổng kết</h2>
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Kết quả tổng kết</h2>
+        <button
+          onClick={handleExportPDF}
+          className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium shadow-md flex items-center gap-2"
+        >
+          <svg
+            className="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+            />
+          </svg>
+          Xuất PDF
+        </button>
+      </div>
 
       {/* Hiển thị tổng chi phí chuyến đi */}
       <div className="bg-purple-50 dark:bg-purple-900/30 border border-purple-200 dark:border-purple-700 rounded-lg p-4">
