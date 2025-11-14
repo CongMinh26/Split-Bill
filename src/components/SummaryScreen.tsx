@@ -72,7 +72,7 @@ export default function SummaryScreen({ eventId }: SummaryScreenProps) {
   const handleExportPDF = async () => {
     if (event && summary) {
       try {
-        await exportSummaryToPDF(event, summary);
+        await exportSummaryToPDF(event, summary, t);
       } catch (error) {
         console.error('Error exporting PDF:', error);
         alert(t('summary.errorExportingPDF'));

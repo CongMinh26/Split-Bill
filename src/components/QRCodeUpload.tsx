@@ -48,7 +48,7 @@ export default function QRCodeUpload({
     // Upload file
     setUploading(true);
     try {
-      const qrCodeURL = await uploadQRCode(eventId, memberName, file);
+      const qrCodeURL = await uploadQRCode(eventId, memberName, file, t);
       await updateMemberQRCode(eventId, memberName, qrCodeURL);
       
       if (onUploadSuccess) {

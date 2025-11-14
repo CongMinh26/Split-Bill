@@ -25,15 +25,28 @@ const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
  * @param eventId - ID của event (dùng để tạo folder path)
  * @param memberName - Tên thành viên (dùng để tạo file name)
  * @param file - File ảnh cần upload
+ * @param t - Translation function (optional)
  */
 export async function uploadQRCode(
   eventId: string,
   memberName: string,
-  file: File
+  file: File,
+  t?: (key: string) => string
 ): Promise<string> {
+  const getMessage = (key: string, defaultMsg: string) => {
+    if (t) {
+      const translated = t(key);
+      return translated !== key ? translated : defaultMsg;
+    }
+    return defaultMsg;
+  };
+
   if (!cloudName || !uploadPreset) {
     throw new Error(
-      'Cloudinary chưa được cấu hình. Vui lòng thêm VITE_CLOUDINARY_CLOUD_NAME và VITE_CLOUDINARY_UPLOAD_PRESET vào file .env'
+      getMessage(
+        'storage.cloudinaryNotConfigured',
+        'Cloudinary chưa được cấu hình. Vui lòng thêm VITE_CLOUDINARY_CLOUD_NAME và VITE_CLOUDINARY_UPLOAD_PRESET vào file .env'
+      )
     );
   }
 
@@ -68,8 +81,10 @@ export async function uploadQRCode(
     return data.secure_url;
   } catch (error) {
     console.error('Error uploading to Cloudinary:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Không thể upload ảnh';
-    throw new Error(`Upload thất bại: ${errorMessage}. Vui lòng kiểm tra cấu hình Cloudinary hoặc thử lại.`);
+    const errorMessage = error instanceof Error ? error.message : getMessage('storage.cannotUploadImage', 'Không thể upload ảnh');
+    const uploadFailed = getMessage('storage.uploadFailed', 'Upload thất bại');
+    const checkConfig = getMessage('storage.checkCloudinaryConfig', 'Vui lòng kiểm tra cấu hình Cloudinary hoặc thử lại.');
+    throw new Error(`${uploadFailed}: ${errorMessage}. ${checkConfig}`);
   }
 }
 
@@ -83,13 +98,26 @@ export async function uploadQRCode(
  * 2. Hoặc xóa trực tiếp từ Cloudinary Dashboard
  * 
  * @param _imageUrl - URL của ảnh cần xóa (không dùng với unsigned preset)
+ * @param t - Translation function (optional)
  */
-export async function deleteQRCode(_imageUrl: string): Promise<void> {
+export async function deleteQRCode(
+  _imageUrl: string,
+  t?: (key: string) => string
+): Promise<void> {
+  const getMessage = (key: string, defaultMsg: string) => {
+    if (t) {
+      const translated = t(key);
+      return translated !== key ? translated : defaultMsg;
+    }
+    return defaultMsg;
+  };
+
   // Với unsigned upload preset, không thể xóa ảnh từ client-side
   // Ảnh cũ sẽ được thay thế bằng URL mới trong Firestore khi upload ảnh mới
-  console.warn(
-    'Cloudinary với unsigned preset không hỗ trợ xóa ảnh từ client-side. ' +
-    'Ảnh cũ sẽ được thay thế bằng URL mới trong Firestore khi upload ảnh mới.'
+  const warningMsg = getMessage(
+    'storage.cannotDeleteWithUnsignedPreset',
+    'Cloudinary với unsigned preset không hỗ trợ xóa ảnh từ client-side. Ảnh cũ sẽ được thay thế bằng URL mới trong Firestore khi upload ảnh mới.'
   );
+  console.warn(warningMsg);
 }
 

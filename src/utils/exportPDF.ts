@@ -2,7 +2,11 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import type { Event, SummaryResult } from '../types';
 
-export async function exportSummaryToPDF(event: Event, summary: SummaryResult) {
+export async function exportSummaryToPDF(
+  event: Event,
+  summary: SummaryResult,
+  t?: (key: string) => string
+) {
   // Tạo một container ẩn để render HTML
   const container = document.createElement('div');
   container.style.position = 'absolute';
@@ -14,6 +18,12 @@ export async function exportSummaryToPDF(event: Event, summary: SummaryResult) {
   
   document.body.appendChild(container);
 
+  // Default translation function nếu không có t được truyền vào
+  const defaultT = (key: string): string => {
+    if (!t) return key;
+    return t(key);
+  };
+
   // Format currency
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('vi-VN').format(amount);
@@ -23,26 +33,27 @@ export async function exportSummaryToPDF(event: Event, summary: SummaryResult) {
   const formatDate = (timestamp: any) => {
     if (!timestamp) return '';
     const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-    return date.toLocaleDateString('vi-VN');
+    const locale = t ? (t('summary.createdDate') === 'Created date' ? 'en-US' : 'vi-VN') : 'vi-VN';
+    return date.toLocaleDateString(locale);
   };
 
   // Tạo HTML content
   let htmlContent = `
     <div style="font-family: Arial, sans-serif; color: #000;">
       <h1 style="text-align: center; font-size: 24px; font-weight: bold; margin-bottom: 20px;">
-        BÁO CÁO TỔNG KẾT
+        ${defaultT('summary.reportTitle')}
       </h1>
       
       <div style="margin-bottom: 20px; font-size: 12px;">
-        <p><strong>Sự kiện:</strong> ${event.name}</p>
-        <p><strong>Ngày tạo:</strong> ${formatDate(event.createdAt)}</p>
-        <p><strong>Mã truy cập:</strong> ${event.accessCode}</p>
-        <p><strong>Thành viên:</strong> ${event.members.join(', ')}</p>
+        <p><strong>${defaultT('summary.event')}:</strong> ${event.name}</p>
+        <p><strong>${defaultT('summary.createdDate')}:</strong> ${formatDate(event.createdAt)}</p>
+        <p><strong>${defaultT('summary.accessCode')}:</strong> ${event.accessCode}</p>
+        <p><strong>${defaultT('summary.members')}:</strong> ${event.members.join(', ')}</p>
       </div>
 
       <div style="background-color: #f3e8ff; border: 1px solid #c084fc; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
         <h2 style="font-size: 14px; font-weight: bold; color: #7c3aed; margin-bottom: 8px;">
-          TỔNG CHI PHÍ CHUYẾN ĐI
+          ${defaultT('summary.totalExpenses')}
         </h2>
         <p style="font-size: 18px; font-weight: bold; color: #9333ea; margin: 0;">
           ${formatCurrency(summary.totalExpenses)} VNĐ
@@ -55,7 +66,7 @@ export async function exportSummaryToPDF(event: Event, summary: SummaryResult) {
     htmlContent += `
       <div style="background-color: #dbeafe; border: 1px solid #60a5fa; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
         <h2 style="font-size: 12px; font-weight: bold; color: #1e40af; margin-bottom: 8px;">
-          QUỸ CHUNG CÒN LẠI
+          ${defaultT('summary.remainingFund')}
         </h2>
         <p style="font-size: 16px; font-weight: bold; color: #2563eb; margin: 0;">
           ${formatCurrency(summary.remainingFund)} VNĐ
@@ -69,7 +80,7 @@ export async function exportSummaryToPDF(event: Event, summary: SummaryResult) {
     htmlContent += `
       <div style="background-color: #dcfce7; border: 1px solid #4ade80; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
         <h2 style="font-size: 12px; font-weight: bold; color: #166534; margin-bottom: 12px;">
-          TIỀN TRẢ LẠI TỪ QUỸ:
+          ${defaultT('summary.fundRefunds')}
         </h2>
         <ul style="list-style: none; padding: 0; margin: 0;">
     `;
@@ -88,7 +99,7 @@ export async function exportSummaryToPDF(event: Event, summary: SummaryResult) {
   htmlContent += `
     <div style="background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
       <h2 style="font-size: 12px; font-weight: bold; margin-bottom: 12px;">
-        SỐ DƯ CỦA TỪNG NGƯỜI:
+        ${defaultT('summary.balances')}
       </h2>
   `;
 
@@ -103,7 +114,7 @@ export async function exportSummaryToPDF(event: Event, summary: SummaryResult) {
           </span>
         </div>
         <div style="font-size: 9px; color: #6b7280; margin-left: 5px;">
-          Đã trả: ${formatCurrency(balance.totalPaid)} | Phải trả: ${formatCurrency(balance.totalOwed)}
+          ${defaultT('summary.totalPaid')}: ${formatCurrency(balance.totalPaid)} | ${defaultT('summary.totalOwed')}: ${formatCurrency(balance.totalOwed)}
         </div>
       </div>
     `;
@@ -116,14 +127,14 @@ export async function exportSummaryToPDF(event: Event, summary: SummaryResult) {
     htmlContent += `
       <div style="background-color: #fef9c3; border: 1px solid #eab308; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
         <h2 style="font-size: 12px; font-weight: bold; color: #854d0e; margin-bottom: 12px;">
-          CÁC KHOẢN CẦN THANH TOÁN (ĐÃ TỐI ƯU):
+          ${defaultT('summary.debts')}
         </h2>
         <ul style="list-style: none; padding: 0; margin: 0;">
     `;
     summary.debts.forEach((debt, index) => {
       htmlContent += `
         <li style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 11px;">
-          <span>${index + 1}. <strong>${debt.from}</strong> cần trả cho <strong>${debt.to}</strong>:</span>
+          <span>${index + 1}. <strong>${debt.from}</strong> ${defaultT('summary.needsToPay')} <strong>${debt.to}</strong>:</span>
           <span style="font-weight: bold; color: #a16207;">${formatCurrency(debt.amount)} VNĐ</span>
         </li>
       `;
@@ -133,7 +144,7 @@ export async function exportSummaryToPDF(event: Event, summary: SummaryResult) {
     htmlContent += `
       <div style="background-color: #dcfce7; border: 1px solid #4ade80; border-radius: 8px; padding: 16px; text-align: center; margin-bottom: 20px;">
         <p style="font-weight: 600; color: #166534; margin: 0; font-size: 11px;">
-          Tất cả đã được cân bằng! Không có khoản nợ nào.
+          ${defaultT('summary.allBalanced')}
         </p>
       </div>
     `;
@@ -143,7 +154,7 @@ export async function exportSummaryToPDF(event: Event, summary: SummaryResult) {
   htmlContent += `
     <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; text-align: center;">
       <p style="font-size: 8px; color: #808080; margin: 0;">
-        Được tạo bởi Split Bill App
+        ${defaultT('summary.createdBy')}
       </p>
     </div>
   `;
@@ -183,13 +194,19 @@ export async function exportSummaryToPDF(event: Event, summary: SummaryResult) {
     }
 
     // Generate filename
-    const fileName = `Bao-cao-${event.name.replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.pdf`;
+    const reportPrefix = defaultT('summary.reportTitle').toLowerCase().replace(/\s+/g, '-');
+    const fileName = `${reportPrefix}-${event.name.replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.pdf`;
 
     // Save PDF
     pdf.save(fileName);
   } catch (error) {
     console.error('Error generating PDF:', error);
-    alert('Có lỗi xảy ra khi tạo PDF. Vui lòng thử lại.');
+    const errorMsg = defaultT('summary.errorExportingPDF');
+    if (errorMsg !== 'summary.errorExportingPDF') {
+      alert(errorMsg);
+    } else {
+      alert('Có lỗi xảy ra khi tạo PDF. Vui lòng thử lại.');
+    }
   } finally {
     // Cleanup
     document.body.removeChild(container);

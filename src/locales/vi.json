@@ -150,7 +150,13 @@
     "clickToViewLarge": "Click để xem lớn",
     "allBalanced": "Tất cả đã được cân bằng! Không có khoản nợ nào.",
     "noDebts": "Không có công nợ",
-    "exportPDF": "Xuất PDF"
+    "exportPDF": "Xuất PDF",
+    "reportTitle": "BÁO CÁO TỔNG KẾT",
+    "event": "Sự kiện",
+    "createdDate": "Ngày tạo",
+    "accessCode": "Mã truy cập",
+    "members": "Thành viên",
+    "createdBy": "Được tạo bởi Split Bill App"
   },
   "qrCode": {
     "manageQRCode": "Quản lý QR Code nhận tiền",
@@ -172,6 +178,13 @@
     "clickToViewLarge": "Click để xem lớn",
     "clickOutsideToClose": "Click bên ngoài để đóng",
     "close": "Đóng"
+  },
+  "storage": {
+    "cloudinaryNotConfigured": "Cloudinary chưa được cấu hình. Vui lòng thêm VITE_CLOUDINARY_CLOUD_NAME và VITE_CLOUDINARY_UPLOAD_PRESET vào file .env",
+    "uploadFailed": "Upload thất bại",
+    "cannotUploadImage": "Không thể upload ảnh",
+    "checkCloudinaryConfig": "Vui lòng kiểm tra cấu hình Cloudinary hoặc thử lại.",
+    "cannotDeleteWithUnsignedPreset": "Cloudinary với unsigned preset không hỗ trợ xóa ảnh từ client-side. Ảnh cũ sẽ được thay thế bằng URL mới trong Firestore khi upload ảnh mới."
   }
 }
 

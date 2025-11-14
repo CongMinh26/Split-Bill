@@ -150,7 +150,13 @@
     "clickToViewLarge": "Click to view large",
     "allBalanced": "All balanced! No debts.",
     "noDebts": "No debts",
-    "exportPDF": "Export PDF"
+    "exportPDF": "Export PDF",
+    "reportTitle": "SUMMARY REPORT",
+    "event": "Event",
+    "createdDate": "Created date",
+    "accessCode": "Access code",
+    "members": "Members",
+    "createdBy": "Created by Split Bill App"
   },
   "qrCode": {
     "manageQRCode": "Manage QR Code for receiving money",
@@ -172,6 +178,13 @@
     "clickToViewLarge": "Click to view large",
     "clickOutsideToClose": "Click outside to close",
     "close": "Close"
+  },
+  "storage": {
+    "cloudinaryNotConfigured": "Cloudinary is not configured. Please add VITE_CLOUDINARY_CLOUD_NAME and VITE_CLOUDINARY_UPLOAD_PRESET to .env file",
+    "uploadFailed": "Upload failed",
+    "cannotUploadImage": "Cannot upload image",
+    "checkCloudinaryConfig": "Please check Cloudinary configuration or try again.",
+    "cannotDeleteWithUnsignedPreset": "Cloudinary with unsigned preset does not support deleting images from client-side. Old images will be replaced with new URLs in Firestore when uploading new images."
   }
 }
 
