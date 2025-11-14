@@ -25,27 +25,38 @@ export default function EventForm({ onSuccess }: EventFormProps) {
     newMembers[index] = value;
     setMembers(newMembers);
     
+    // Nếu thay đổi thành viên đầu tiên, cập nhật tên người tạo
+    if (index === 0) {
+      setCreatedBy(value);
+    }
+    
     // Cập nhật fundContributions khi thêm/xóa thành viên
     if (hasFund) {
       const newFundContributions = { ...fundContributions };
-      if (value) {
-        if (!newFundContributions[value]) {
-          newFundContributions[value] = 0;
-        }
-      } else {
-        // Xóa thành viên cũ khỏi fundContributions nếu tên bị xóa
-        const oldName = Object.keys(newFundContributions).find(
-          (name, i) => i === index && !members.includes(name)
-        );
-        if (oldName) {
-          delete newFundContributions[oldName];
+      const oldName = members[index];
+      
+      // Xóa tên cũ khỏi quỹ nếu có
+      if (oldName && oldName !== value && oldName.trim()) {
+        delete newFundContributions[oldName];
+      }
+      
+      // Thêm tên mới vào quỹ
+      if (value && value.trim()) {
+        if (!newFundContributions[value.trim()]) {
+          newFundContributions[value.trim()] = 0;
         }
       }
+      
       setFundContributions(newFundContributions);
     }
   };
 
   const handleRemoveMember = (index: number) => {
+    // Không cho phép xóa thành viên đầu tiên (người tạo)
+    if (index === 0) {
+      return;
+    }
+    
     const newMembers = members.filter((_, i) => i !== index);
     setMembers(newMembers);
     
@@ -67,6 +78,44 @@ export default function EventForm({ onSuccess }: EventFormProps) {
     });
   };
 
+  const handleCreatorNameChange = (newName: string) => {
+    setCreatedBy(newName);
+    
+    // Tự động thêm người tạo vào vị trí đầu tiên trong danh sách thành viên
+    const newMembers = [...members];
+    const oldCreatorName = members.length > 0 ? members[0] : '';
+    
+    // Cập nhật tên người tạo ở vị trí đầu tiên
+    if (newMembers.length === 0) {
+      newMembers.push(newName);
+    } else {
+      newMembers[0] = newName;
+    }
+    
+    // Đảm bảo có ít nhất 1 ô trống cho thành viên khác nếu đã nhập tên
+    if (newMembers.length === 1 && newName.trim()) {
+      newMembers.push('');
+    }
+    
+    setMembers(newMembers);
+    
+    // Cập nhật fundContributions nếu có quỹ chung
+    if (hasFund) {
+      const newFundContributions = { ...fundContributions };
+      // Xóa tên cũ khỏi quỹ nếu có và khác tên mới
+      if (oldCreatorName && oldCreatorName !== newName && oldCreatorName.trim()) {
+        delete newFundContributions[oldCreatorName];
+      }
+      // Thêm tên mới vào quỹ
+      if (newName.trim()) {
+        if (!newFundContributions[newName.trim()]) {
+          newFundContributions[newName.trim()] = 0;
+        }
+      }
+      setFundContributions(newFundContributions);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -77,20 +126,35 @@ export default function EventForm({ onSuccess }: EventFormProps) {
       return;
     }
     
-    const validMembers = members.filter((m) => m.trim() !== '');
-    if (validMembers.length < 2) {
-      setError('Cần ít nhất 2 thành viên');
-      return;
-    }
-
     if (!createdBy.trim()) {
       setError('Vui lòng nhập tên người tạo');
       return;
     }
+    
+    const validMembers = members.filter((m) => m.trim() !== '');
+    
+    // Đảm bảo người tạo có trong danh sách thành viên
+    const creatorName = createdBy.trim();
+    if (!validMembers.includes(creatorName)) {
+      validMembers.unshift(creatorName);
+    }
+    
+    if (validMembers.length < 2) {
+      setError('Cần ít nhất 2 thành viên (bao gồm người tạo)');
+      return;
+    }
 
+    // Xử lý quỹ chung nếu có
+    let finalFundContributions: { [key: string]: number } | undefined = undefined;
     if (hasFund) {
+      // Đảm bảo người tạo có trong fundContributions
+      finalFundContributions = { ...fundContributions };
+      if (!finalFundContributions[creatorName]) {
+        finalFundContributions[creatorName] = 0;
+      }
+      
       const allMembersHaveFund = validMembers.every(
-        (member) => fundContributions[member] && fundContributions[member] > 0
+        (member) => finalFundContributions![member] !== undefined && finalFundContributions![member] > 0
       );
       if (!allMembersHaveFund) {
         setError('Vui lòng nhập số tiền quỹ cho tất cả thành viên');
@@ -103,9 +167,9 @@ export default function EventForm({ onSuccess }: EventFormProps) {
       const eventId = await createEvent(
         eventName.trim(),
         validMembers,
-        createdBy.trim(),
+        creatorName,
         hasFund,
-        hasFund ? fundContributions : undefined
+        finalFundContributions
       );
 
       console.log(eventId,'eventId');
@@ -143,7 +207,7 @@ export default function EventForm({ onSuccess }: EventFormProps) {
           <input
             type="text"
             value={createdBy}
-            onChange={(e) => setCreatedBy(e.target.value)}
+            onChange={(e) => handleCreatorNameChange(e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="Nhập tên của bạn"
             required
@@ -175,9 +239,9 @@ export default function EventForm({ onSuccess }: EventFormProps) {
                 value={member}
                 onChange={(e) => handleMemberChange(index, e.target.value)}
                 className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder={`Thành viên ${index + 1}`}
+                placeholder={index === 0 ? "Người tạo (tự động điền)" : `Thành viên ${index}`}
               />
-              {members.length > 1 && (
+              {members.length > 1 && index !== 0 && (
                 <button
                   type="button"
                   onClick={() => handleRemoveMember(index)}
@@ -205,8 +269,13 @@ export default function EventForm({ onSuccess }: EventFormProps) {
             onChange={(e) => {
               setHasFund(e.target.checked);
               if (e.target.checked) {
-                // Khởi tạo fundContributions cho tất cả thành viên hiện tại
+                // Khởi tạo fundContributions cho tất cả thành viên hiện tại (bao gồm người tạo)
                 const initialFunds: { [key: string]: number } = {};
+                // Thêm người tạo vào quỹ nếu đã nhập tên
+                if (createdBy.trim()) {
+                  initialFunds[createdBy.trim()] = 0;
+                }
+                // Thêm các thành viên khác
                 members.forEach((member) => {
                   if (member.trim()) {
                     initialFunds[member] = 0;

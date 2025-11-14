@@ -91,3 +91,40 @@ export async function deleteExpense(expenseId: string): Promise<void> {
   await deleteDoc(docRef);
 }
 
+/**
+ * Cập nhật tên thành viên trong tất cả expense của một event
+ */
+export async function updateMemberNameInExpenses(
+  eventId: string,
+  oldName: string,
+  newName: string
+): Promise<void> {
+  const expenses = await getExpensesByEventId(eventId);
+  
+  // Cập nhật từng expense
+  const updatePromises = expenses.map(async (expense) => {
+    const updates: any = {};
+    let needsUpdate = false;
+
+    // Cập nhật paidBy nếu là thành viên này
+    if (expense.paidBy === oldName) {
+      updates.paidBy = newName;
+      needsUpdate = true;
+    }
+
+    // Cập nhật splitBetween nếu có thành viên này
+    if (expense.splitBetween.includes(oldName)) {
+      updates.splitBetween = expense.splitBetween.map((member) =>
+        member === oldName ? newName : member
+      );
+      needsUpdate = true;
+    }
+
+    if (needsUpdate) {
+      await updateExpense(expense.id, updates);
+    }
+  });
+
+  await Promise.all(updatePromises);
+}
+

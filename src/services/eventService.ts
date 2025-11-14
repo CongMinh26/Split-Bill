@@ -146,3 +146,99 @@ export async function updateMemberQRCode(
   });
 }
 
+/**
+ * Cập nhật danh sách thành viên
+ */
+export async function updateMembers(
+  eventId: string,
+  members: string[]
+): Promise<void> {
+  const docRef = doc(db, EVENTS_COLLECTION, eventId);
+  await updateDoc(docRef, {
+    members,
+  });
+}
+
+/**
+ * Cập nhật tên thành viên trong event (bao gồm fundContributions và memberQRCodes)
+ * Lưu ý: Hàm này cũng cập nhật danh sách thành viên
+ */
+export async function updateMemberName(
+  eventId: string,
+  oldName: string,
+  newName: string
+): Promise<void> {
+  const docRef = doc(db, EVENTS_COLLECTION, eventId);
+  const event = await getEventById(eventId);
+  
+  if (!event) {
+    throw new Error('Event not found');
+  }
+
+  // Cập nhật danh sách thành viên
+  const updatedMembers = event.members.map((member) =>
+    member === oldName ? newName : member
+  );
+
+  const updates: any = {
+    members: updatedMembers,
+  };
+
+  // Cập nhật fundContributions nếu có
+  if (event.fundContributions && event.fundContributions[oldName] !== undefined) {
+    const updatedFundContributions = { ...event.fundContributions };
+    updatedFundContributions[newName] = updatedFundContributions[oldName];
+    delete updatedFundContributions[oldName];
+    updates.fundContributions = updatedFundContributions;
+  }
+
+  // Cập nhật memberQRCodes nếu có
+  if (event.memberQRCodes && event.memberQRCodes[oldName]) {
+    const updatedMemberQRCodes = { ...event.memberQRCodes };
+    updatedMemberQRCodes[newName] = updatedMemberQRCodes[oldName];
+    delete updatedMemberQRCodes[oldName];
+    updates.memberQRCodes = updatedMemberQRCodes;
+  }
+
+  await updateDoc(docRef, updates);
+}
+
+/**
+ * Chỉ cập nhật fundContributions và memberQRCodes khi đổi tên thành viên
+ * (không cập nhật danh sách thành viên)
+ */
+export async function updateMemberNameInEventData(
+  eventId: string,
+  oldName: string,
+  newName: string
+): Promise<void> {
+  const docRef = doc(db, EVENTS_COLLECTION, eventId);
+  const event = await getEventById(eventId);
+  
+  if (!event) {
+    throw new Error('Event not found');
+  }
+
+  const updates: any = {};
+
+  // Cập nhật fundContributions nếu có
+  if (event.fundContributions && event.fundContributions[oldName] !== undefined) {
+    const updatedFundContributions = { ...event.fundContributions };
+    updatedFundContributions[newName] = updatedFundContributions[oldName];
+    delete updatedFundContributions[oldName];
+    updates.fundContributions = updatedFundContributions;
+  }
+
+  // Cập nhật memberQRCodes nếu có
+  if (event.memberQRCodes && event.memberQRCodes[oldName]) {
+    const updatedMemberQRCodes = { ...event.memberQRCodes };
+    updatedMemberQRCodes[newName] = updatedMemberQRCodes[oldName];
+    delete updatedMemberQRCodes[oldName];
+    updates.memberQRCodes = updatedMemberQRCodes;
+  }
+
+  if (Object.keys(updates).length > 0) {
+    await updateDoc(docRef, updates);
+  }
+}
+

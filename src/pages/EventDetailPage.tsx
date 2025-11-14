@@ -5,6 +5,7 @@ import type { Event } from '../types';
 import ExpenseForm from '../components/ExpenseForm';
 import ExpenseList from '../components/ExpenseList';
 import MemberQRCodeManager from '../components/MemberQRCodeManager';
+import EditMembersForm from '../components/EditMembersForm';
 import ThemeToggle from '../components/ThemeToggle';
 
 export default function EventDetailPage() {
@@ -15,6 +16,7 @@ export default function EventDetailPage() {
   const [error, setError] = useState('');
   const [showExpenseForm, setShowExpenseForm] = useState(false);
   const [showQRManager, setShowQRManager] = useState(false);
+  const [showEditMembers, setShowEditMembers] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
@@ -47,6 +49,23 @@ export default function EventDetailPage() {
 
   const handleExpenseAdded = () => {
     setShowExpenseForm(false);
+    setRefreshKey((prev) => prev + 1);
+  };
+
+  const handleMembersUpdated = async () => {
+    setShowEditMembers(false);
+    // Reload event để cập nhật danh sách thành viên
+    if (eventId) {
+      try {
+        const { getEventById } = await import('../services/eventService');
+        const eventData = await getEventById(eventId);
+        if (eventData) {
+          setEvent(eventData);
+        }
+      } catch (err) {
+        console.error('Error reloading event:', err);
+      }
+    }
     setRefreshKey((prev) => prev + 1);
   };
 
@@ -126,6 +145,7 @@ export default function EventDetailPage() {
             onClick={() => {
               setShowExpenseForm(!showExpenseForm);
               setShowQRManager(false);
+              setShowEditMembers(false);
             }}
             className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium shadow-md"
           >
@@ -135,10 +155,21 @@ export default function EventDetailPage() {
             onClick={() => {
               setShowQRManager(!showQRManager);
               setShowExpenseForm(false);
+              setShowEditMembers(false);
             }}
             className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-medium shadow-md"
           >
             {showQRManager ? 'Ẩn QR Codes' : 'Quản lý QR Code'}
+          </button>
+          <button
+            onClick={() => {
+              setShowEditMembers(!showEditMembers);
+              setShowExpenseForm(false);
+              setShowQRManager(false);
+            }}
+            className="px-6 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 font-medium shadow-md"
+          >
+            {showEditMembers ? 'Ẩn chỉnh sửa' : 'Chỉnh sửa thành viên'}
           </button>
           <button
             onClick={() => navigate(`/event/${eventId}/summary`)}
@@ -151,6 +182,12 @@ export default function EventDetailPage() {
         {showQRManager && eventId && (
           <div className="mb-6">
             <MemberQRCodeManager eventId={eventId} />
+          </div>
+        )}
+
+        {showEditMembers && (
+          <div className="mb-6">
+            <EditMembersForm event={event} onSuccess={handleMembersUpdated} onCancel={() => setShowEditMembers(false)} />
           </div>
         )}
 

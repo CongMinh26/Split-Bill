@@ -42,7 +42,7 @@ export default function HomePage() {
       <div className="max-w-4xl mx-auto px-4">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-800 dark:text-gray-100 mb-2">Split Bill</h1>
-          <p className="text-gray-600 dark:text-gray-400">Ứng dụng chia tiền thông minh cho nhóm</p>
+          <p className="text-gray-600 dark:text-gray-400">Group money sharing app designed by Grok</p>
         </div>
 
         {!showForm && !showJoinForm && (
