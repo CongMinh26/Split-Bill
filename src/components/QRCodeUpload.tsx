@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { uploadQRCode } from '../services/storageService';
 import { updateMemberQRCode } from '../services/eventService';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface QRCodeUploadProps {
   eventId: string;
@@ -15,6 +16,7 @@ export default function QRCodeUpload({
   currentQRCode,
   onUploadSuccess,
 }: QRCodeUploadProps) {
+  const { t } = useLanguage();
   const [uploading, setUploading] = useState(false);
   const [preview, setPreview] = useState<string | null>(currentQRCode || null);
   const [showModal, setShowModal] = useState(false);
@@ -26,13 +28,13 @@ export default function QRCodeUpload({
 
     // Validate file type
     if (!file.type.startsWith('image/')) {
-      alert('Vui lòng chọn file ảnh');
+      alert(t('qrCode.pleaseSelectImage'));
       return;
     }
 
     // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      alert('File quá lớn. Vui lòng chọn file nhỏ hơn 5MB');
+      alert(t('qrCode.fileTooLarge'));
       return;
     }
 
@@ -54,7 +56,7 @@ export default function QRCodeUpload({
       }
     } catch (error) {
       console.error('Error uploading QR code:', error);
-      alert('Có lỗi xảy ra khi upload QR code');
+      alert(t('qrCode.errorUploading'));
       setPreview(currentQRCode || null);
     } finally {
       setUploading(false);
@@ -84,10 +86,10 @@ export default function QRCodeUpload({
           <div className="relative">
             <img
               src={preview}
-              alt={`QR code của ${memberName}`}
+              alt={`${t('qrCode.qrCodeOf')} ${memberName}`}
               className="w-12 h-12 object-cover rounded border border-gray-300 dark:border-gray-600 cursor-pointer hover:opacity-80 transition-opacity"
               onClick={handleImageClick}
-              title="Click để xem lớn"
+              title={t('qrCode.clickToViewLarge')}
             />
           </div>
         )}
@@ -104,7 +106,7 @@ export default function QRCodeUpload({
           disabled={uploading}
           className="px-3 py-1 text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded hover:bg-blue-200 dark:hover:bg-blue-800 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {uploading ? 'Đang upload...' : preview ? 'Đổi QR' : 'Thêm QR'}
+          {uploading ? t('qrCode.uploading') : preview ? t('qrCode.change') : t('qrCode.add')}
         </button>
       </div>
 
@@ -121,12 +123,12 @@ export default function QRCodeUpload({
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
               <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
-                QR Code của {memberName}
+                {t('qrCode.qrCodeOf')} {memberName}
               </h3>
               <button
                 onClick={closeModal}
                 className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
-                aria-label="Đóng"
+                aria-label={t('qrCode.close')}
               >
                 <svg
                   className="w-6 h-6"
@@ -148,7 +150,7 @@ export default function QRCodeUpload({
             <div className="p-6 flex items-center justify-center">
               <img
                 src={preview}
-                alt={`QR code của ${memberName}`}
+                alt={`${t('qrCode.qrCodeOf')} ${memberName}`}
                 className="max-w-full max-h-[70vh] object-contain rounded"
               />
             </div>
@@ -156,7 +158,7 @@ export default function QRCodeUpload({
             {/* Footer */}
             <div className="p-4 border-t border-gray-200 dark:border-gray-700 text-center">
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                Click bên ngoài để đóng
+                {t('qrCode.clickOutsideToClose')}
               </p>
             </div>
           </div>

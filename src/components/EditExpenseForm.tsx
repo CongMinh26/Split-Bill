@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { updateExpense } from '../services/expenseService';
 import type { Event, Expense } from '../types';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface EditExpenseFormProps {
   event: Event;
@@ -10,6 +11,7 @@ interface EditExpenseFormProps {
 }
 
 export default function EditExpenseForm({ event, expense, onSuccess, onCancel }: EditExpenseFormProps) {
+  const { t } = useLanguage();
   const [name, setName] = useState(expense.name);
   const [amount, setAmount] = useState('');
   const [paidBy, setPaidBy] = useState(expense.paidBy);
@@ -67,23 +69,23 @@ export default function EditExpenseForm({ event, expense, onSuccess, onCancel }:
 
     // Validation
     if (!name.trim()) {
-      setError('Vui lòng nhập tên khoản chi');
+      setError(t('editExpenseForm.pleaseEnterExpenseName'));
       return;
     }
 
     const numAmount = parseNumber(amount);
     if (!numAmount || numAmount <= 0) {
-      setError('Vui lòng nhập số tiền hợp lệ');
+      setError(t('editExpenseForm.pleaseEnterValidAmount'));
       return;
     }
 
     if (!paidBy) {
-      setError('Vui lòng chọn người trả');
+      setError(t('editExpenseForm.pleaseSelectPayer'));
       return;
     }
 
     if (splitBetween.length === 0) {
-      setError('Vui lòng chọn ít nhất một người để chia');
+      setError(t('editExpenseForm.pleaseSelectAtLeastOnePerson'));
       return;
     }
 
@@ -100,7 +102,7 @@ export default function EditExpenseForm({ event, expense, onSuccess, onCancel }:
         onSuccess();
       }
     } catch (err) {
-      setError('Có lỗi xảy ra khi cập nhật chi phí');
+      setError(t('editExpenseForm.errorUpdatingExpense'));
       console.error(err);
     } finally {
       setLoading(false);
@@ -109,31 +111,31 @@ export default function EditExpenseForm({ event, expense, onSuccess, onCancel }:
 
   // Tạo danh sách options cho "Ai trả" (bao gồm Quỹ chung nếu có)
   const paidByOptions = event.hasFund
-    ? [...event.members, 'Quỹ chung']
+    ? [...event.members, t('editExpenseForm.commonFund')]
     : event.members;
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border-2 border-blue-500">
-      <h3 className="text-xl font-bold mb-4 text-gray-800 dark:text-gray-100">Sửa khoản chi</h3>
+      <h3 className="text-xl font-bold mb-4 text-gray-800 dark:text-gray-100">{t('editExpenseForm.editExpense')}</h3>
       
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Tên khoản chi *
+            {t('editExpenseForm.expenseName')} *
           </label>
           <input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="Ví dụ: Xăng xe, Ăn trưa"
+            placeholder={t('editExpenseForm.expenseNamePlaceholder')}
             required
           />
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Số tiền (VNĐ) *
+            {t('editExpenseForm.amount')} (VNĐ) *
           </label>
           <input
             type="text"
@@ -147,7 +149,7 @@ export default function EditExpenseForm({ event, expense, onSuccess, onCancel }:
 
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Ai đã trả? *
+            {t('editExpenseForm.paidBy')} *
           </label>
           <select
             value={paidBy}
@@ -165,7 +167,7 @@ export default function EditExpenseForm({ event, expense, onSuccess, onCancel }:
 
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Chia cho ai? *
+            {t('editExpenseForm.splitBetween')} *
           </label>
           <div className="mb-2">
             <label className="flex items-center">
@@ -175,7 +177,7 @@ export default function EditExpenseForm({ event, expense, onSuccess, onCancel }:
                 onChange={(e) => setSplitAll(e.target.checked)}
                 className="mr-2"
               />
-              <span className="text-sm text-gray-700 dark:text-gray-300">Chia cho tất cả</span>
+              <span className="text-sm text-gray-700 dark:text-gray-300">{t('editExpenseForm.splitAll')}</span>
             </label>
           </div>
           
@@ -206,7 +208,7 @@ export default function EditExpenseForm({ event, expense, onSuccess, onCancel }:
             disabled={loading}
             className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
           >
-            {loading ? 'Đang lưu...' : 'Lưu thay đổi'}
+            {loading ? t('editExpenseForm.updating') : t('editExpenseForm.update')}
           </button>
           {onCancel && (
             <button
@@ -214,7 +216,7 @@ export default function EditExpenseForm({ event, expense, onSuccess, onCancel }:
               onClick={onCancel}
               className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600"
             >
-              Hủy
+              {t('common.cancel')}
             </button>
           )}
         </div>

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { updateMembers, updateMemberNameInEventData } from '../services/eventService';
 import { updateMemberNameInExpenses } from '../services/expenseService';
 import type { Event } from '../types';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface EditMembersFormProps {
   event: Event;
@@ -10,6 +11,7 @@ interface EditMembersFormProps {
 }
 
 export default function EditMembersForm({ event, onSuccess, onCancel }: EditMembersFormProps) {
+  const { t } = useLanguage();
   const [members, setMembers] = useState<string[]>(event.members);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -35,14 +37,14 @@ export default function EditMembersForm({ event, onSuccess, onCancel }: EditMemb
     // Validation
     const validMembers = members.filter((m) => m.trim() !== '');
     if (validMembers.length < 2) {
-      setError('Cần ít nhất 2 thành viên');
+      setError(t('editMembersForm.needAtLeast2Members'));
       return;
     }
 
     // Kiểm tra trùng tên
     const uniqueMembers = new Set(validMembers.map((m) => m.trim().toLowerCase()));
     if (uniqueMembers.size !== validMembers.length) {
-      setError('Tên thành viên không được trùng nhau');
+      setError(t('editMembersForm.duplicateMemberNames'));
       return;
     }
 
@@ -92,7 +94,7 @@ export default function EditMembersForm({ event, onSuccess, onCancel }: EditMemb
         onSuccess();
       }
     } catch (err) {
-      setError('Có lỗi xảy ra khi cập nhật thành viên');
+      setError(t('editMembersForm.errorUpdatingMembers'));
       console.error(err);
     } finally {
       setLoading(false);
@@ -101,12 +103,12 @@ export default function EditMembersForm({ event, onSuccess, onCancel }: EditMemb
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-      <h2 className="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-100">Chỉnh sửa thành viên</h2>
+      <h2 className="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-100">{t('editMembersForm.editMembers')}</h2>
       
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Thành viên *
+            {t('editMembersForm.members')} *
           </label>
           {members.map((member, index) => (
             <div key={index} className="flex gap-2 mb-2">
@@ -115,7 +117,7 @@ export default function EditMembersForm({ event, onSuccess, onCancel }: EditMemb
                 value={member}
                 onChange={(e) => handleMemberChange(index, e.target.value)}
                 className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder={index === 0 ? "Người tạo" : `Thành viên ${index}`}
+                placeholder={index === 0 ? t('editMembersForm.creatorPlaceholder') : `${t('editMembersForm.memberPlaceholder')} ${index}`}
               />
             </div>
           ))}
@@ -124,7 +126,7 @@ export default function EditMembersForm({ event, onSuccess, onCancel }: EditMemb
             onClick={handleAddMember}
             className="mt-2 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600"
           >
-            + Thêm thành viên
+            + {t('editMembersForm.addMember')}
           </button>
         </div>
 
@@ -138,7 +140,7 @@ export default function EditMembersForm({ event, onSuccess, onCancel }: EditMemb
             disabled={loading}
             className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
           >
-            {loading ? 'Đang cập nhật...' : 'Lưu thay đổi'}
+            {loading ? t('editMembersForm.updating') : t('editMembersForm.saveChanges')}
           </button>
           {onCancel && (
             <button
@@ -146,7 +148,7 @@ export default function EditMembersForm({ event, onSuccess, onCancel }: EditMemb
               onClick={onCancel}
               className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600"
             >
-              Hủy
+              {t('common.cancel')}
             </button>
           )}
         </div>

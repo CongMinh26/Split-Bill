@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react';
 import { getEventById } from '../services/eventService';
 import QRCodeUpload from './QRCodeUpload';
 import type { Event } from '../types';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface MemberQRCodeManagerProps {
   eventId: string;
 }
 
 export default function MemberQRCodeManager({ eventId }: MemberQRCodeManagerProps) {
+  const { t } = useLanguage();
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -33,7 +35,7 @@ export default function MemberQRCodeManager({ eventId }: MemberQRCodeManagerProp
   };
 
   if (loading) {
-    return <div className="text-sm text-gray-600 dark:text-gray-400">Đang tải...</div>;
+    return <div className="text-sm text-gray-600 dark:text-gray-400">{t('common.loading')}</div>;
   }
 
   if (!event) {
@@ -43,10 +45,10 @@ export default function MemberQRCodeManager({ eventId }: MemberQRCodeManagerProp
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
       <h3 className="text-lg font-bold mb-4 text-gray-800 dark:text-gray-100">
-        Quản lý QR Code nhận tiền
+        {t('qrCode.manageQRCode')}
       </h3>
       <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-        Upload QR code nhận tiền cho từng thành viên để thuận tiện chuyển khoản
+        {t('qrCode.uploadQRCodeDescription')}
       </p>
       
       <div className="space-y-4">
@@ -58,7 +60,7 @@ export default function MemberQRCodeManager({ eventId }: MemberQRCodeManagerProp
             <div className="flex items-center gap-3">
               <span className="font-medium text-gray-700 dark:text-gray-300">{member}</span>
               {event.memberQRCodes?.[member] && (
-                <span className="text-xs text-green-600 dark:text-green-400">✓ Đã có QR</span>
+                <span className="text-xs text-green-600 dark:text-green-400">✓ {t('qrCode.hasQR')}</span>
               )}
             </div>
             <QRCodeUpload

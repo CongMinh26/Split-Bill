@@ -3,6 +3,7 @@ import { getExpensesByEventId, deleteExpense } from '../services/expenseService'
 import { getEventById } from '../services/eventService';
 import type { Expense, Event } from '../types';
 import EditExpenseForm from './EditExpenseForm';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface ExpenseListProps {
   eventId: string;
@@ -10,6 +11,7 @@ interface ExpenseListProps {
 }
 
 export default function ExpenseList({ eventId, onExpenseChange }: ExpenseListProps) {
+  const { t } = useLanguage();
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
@@ -25,7 +27,7 @@ export default function ExpenseList({ eventId, onExpenseChange }: ExpenseListPro
     } catch (err) {
       console.log(err,'err');
       
-      setError('Không thể tải danh sách chi phí');
+      setError(t('expenseList.errorLoadingExpenses'));
       console.error(err);
     } finally {
       setLoading(false);
@@ -47,7 +49,7 @@ export default function ExpenseList({ eventId, onExpenseChange }: ExpenseListPro
   }, [eventId]);
 
   const handleDelete = async (expenseId: string) => {
-    if (!confirm('Bạn có chắc muốn xóa khoản chi này?')) {
+    if (!confirm(t('expenseList.confirmDelete'))) {
       return;
     }
 
@@ -58,7 +60,7 @@ export default function ExpenseList({ eventId, onExpenseChange }: ExpenseListPro
         onExpenseChange();
       }
     } catch (err) {
-      alert('Không thể xóa khoản chi');
+      alert(t('expenseList.errorDeletingExpense'));
       console.error(err);
     }
   };
@@ -90,7 +92,7 @@ export default function ExpenseList({ eventId, onExpenseChange }: ExpenseListPro
   };
 
   if (loading) {
-    return <div className="text-center py-4 text-gray-600 dark:text-gray-400">Đang tải...</div>;
+    return <div className="text-center py-4 text-gray-600 dark:text-gray-400">{t('expenseList.loading')}</div>;
   }
 
   if (error) {
@@ -100,14 +102,14 @@ export default function ExpenseList({ eventId, onExpenseChange }: ExpenseListPro
   if (expenses.length === 0) {
     return (
       <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-        Chưa có khoản chi nào. Hãy thêm khoản chi đầu tiên!
+        {t('expenseList.noExpenses')}
       </div>
     );
   }
 
   return (
     <div className="space-y-4">
-      <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100">Danh sách chi phí</h3>
+      <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100">{t('expenseList.expenseList')}</h3>
       <div className="space-y-3">
         {expenses.map((expense) => {
           const amountPerPerson = expense.amount / expense.splitBetween.length;
@@ -135,10 +137,10 @@ export default function ExpenseList({ eventId, onExpenseChange }: ExpenseListPro
                 <div className="flex-1">
                   <h4 className="font-semibold text-gray-800 dark:text-gray-100">{expense.name}</h4>
                   <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                    Trả bởi: <span className="font-medium">{expense.paidBy}</span>
+                    {t('expenseList.paidBy')} <span className="font-medium">{expense.paidBy}</span>
                   </p>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Chia cho: {expense.splitBetween.join(', ')}
+                    {t('expenseList.splitFor')} {expense.splitBetween.join(', ')}
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
                     {formatDate(expense.createdAt)}
@@ -149,7 +151,7 @@ export default function ExpenseList({ eventId, onExpenseChange }: ExpenseListPro
                     {formatCurrency(expense.amount)} VNĐ
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-400">
-                    {formatCurrency(amountPerPerson)} VNĐ/người
+                    {formatCurrency(amountPerPerson)} {t('expenseList.perPerson')}
                   </p>
                 </div>
               </div>
@@ -158,13 +160,13 @@ export default function ExpenseList({ eventId, onExpenseChange }: ExpenseListPro
                   onClick={() => handleEdit(expense.id)}
                   className="px-3 py-1 text-sm bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded hover:bg-blue-200 dark:hover:bg-blue-800"
                 >
-                  Sửa
+                  {t('common.edit')}
                 </button>
                 <button
                   onClick={() => handleDelete(expense.id)}
                   className="px-3 py-1 text-sm bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 rounded hover:bg-red-200 dark:hover:bg-red-800"
                 >
-                  Xóa
+                  {t('common.delete')}
                 </button>
               </div>
             </div>

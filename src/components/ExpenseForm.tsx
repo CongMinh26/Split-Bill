@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { createExpense } from '../services/expenseService';
 import type { Event } from '../types';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface ExpenseFormProps {
   event: Event;
@@ -8,6 +9,7 @@ interface ExpenseFormProps {
 }
 
 export default function ExpenseForm({ event, onSuccess }: ExpenseFormProps) {
+  const { t } = useLanguage();
   const [name, setName] = useState('');
   const [amount, setAmount] = useState('');
   const [paidBy, setPaidBy] = useState('');
@@ -74,24 +76,24 @@ export default function ExpenseForm({ event, onSuccess }: ExpenseFormProps) {
 
     // Validation
     if (!name.trim()) {
-      setError('Vui lòng nhập tên khoản chi');
+      setError(t('expenseForm.pleaseEnterExpenseName'));
       return;
     }
 
     // Parse số từ string có dấu phẩy
     const numAmount = parseNumber(amount);
     if (!numAmount || numAmount <= 0) {
-      setError('Vui lòng nhập số tiền hợp lệ');
+      setError(t('expenseForm.pleaseEnterValidAmount'));
       return;
     }
 
     if (!paidBy) {
-      setError('Vui lòng chọn người trả');
+      setError(t('expenseForm.pleaseSelectPayer'));
       return;
     }
 
     if (splitBetween.length === 0) {
-      setError('Vui lòng chọn ít nhất một người để chia');
+      setError(t('expenseForm.pleaseSelectAtLeastOnePerson'));
       return;
     }
 
@@ -109,7 +111,7 @@ export default function ExpenseForm({ event, onSuccess }: ExpenseFormProps) {
         onSuccess();
       }
     } catch (err) {
-      setError('Có lỗi xảy ra khi thêm chi phí');
+      setError(t('expenseForm.errorAddingExpense'));
       console.error(err);
     } finally {
       setLoading(false);
@@ -118,31 +120,31 @@ export default function ExpenseForm({ event, onSuccess }: ExpenseFormProps) {
 
   // Tạo danh sách options cho "Ai trả" (bao gồm Quỹ chung nếu có)
   const paidByOptions = event.hasFund
-    ? [...event.members, 'Quỹ chung']
+    ? [...event.members, t('expenseForm.commonFund')]
     : event.members;
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-      <h3 className="text-xl font-bold mb-4 text-gray-800 dark:text-gray-100">Thêm khoản chi</h3>
+      <h3 className="text-xl font-bold mb-4 text-gray-800 dark:text-gray-100">{t('expenseForm.addExpense')}</h3>
       
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Tên khoản chi *
+            {t('expenseForm.expenseName')} *
           </label>
           <input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="Ví dụ: Xăng xe, Ăn trưa"
+            placeholder={t('expenseForm.expenseNamePlaceholder')}
             required
           />
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Số tiền (VNĐ) *
+            {t('expenseForm.amount')} (VNĐ) *
           </label>
           <input
             type="text"
@@ -156,7 +158,7 @@ export default function ExpenseForm({ event, onSuccess }: ExpenseFormProps) {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Ai đã trả? *
+            {t('expenseForm.paidBy')} *
           </label>
           <select
             value={paidBy}
@@ -174,7 +176,7 @@ export default function ExpenseForm({ event, onSuccess }: ExpenseFormProps) {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Chia cho ai? *
+            {t('expenseForm.splitBetween')} *
           </label>
           <div className="mb-2">
             <label className="flex items-center">
@@ -184,7 +186,7 @@ export default function ExpenseForm({ event, onSuccess }: ExpenseFormProps) {
                 onChange={(e) => setSplitAll(e.target.checked)}
                 className="mr-2"
               />
-              <span className="text-sm text-gray-700 dark:text-gray-300">Chia cho tất cả</span>
+              <span className="text-sm text-gray-700 dark:text-gray-300">{t('expenseForm.splitAll')}</span>
             </label>
           </div>
           
@@ -214,7 +216,7 @@ export default function ExpenseForm({ event, onSuccess }: ExpenseFormProps) {
           disabled={loading}
           className="w-full px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
         >
-          {loading ? 'Đang lưu...' : 'Lưu'}
+          {loading ? t('expenseForm.adding') : t('common.save')}
         </button>
       </form>
     </div>
