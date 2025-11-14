@@ -1,23 +1,25 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import EventForm from '../components/EventForm';
-import ThemeToggle from '../components/ThemeToggle';
+import HeaderControls from '../components/HeaderControls';
+import { useLanguage } from '../contexts/LanguageContext';
 
 export default function HomePage() {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [showForm, setShowForm] = useState(false);
   const [showJoinForm, setShowJoinForm] = useState(false);
   const [accessCode, setAccessCode] = useState('');
   const [joinError, setJoinError] = useState('');
 
   const handleEventCreated = (eventId: string, accessCode: string) => {
-    alert(`Sự kiện đã được tạo thành công!\nMã truy cập: ${accessCode}\nHãy chia sẻ mã này với các thành viên khác.`);
+    alert(`${t('eventForm.eventCreatedSuccess')}\n${t('eventForm.accessCodeMessage')} ${accessCode}\n${t('eventForm.shareAccessCode')}`);
     navigate(`/event/${eventId}`);
   };
 
   const handleJoinEvent = async () => {
     if (!accessCode.trim()) {
-      setJoinError('Vui lòng nhập mã truy cập');
+      setJoinError(t('home.pleaseEnterAccessCode'));
       return;
     }
 
@@ -28,21 +30,21 @@ export default function HomePage() {
       if (event) {
         navigate(`/event/${event.id}`);
       } else {
-        setJoinError('Mã truy cập không hợp lệ');
+        setJoinError(t('home.invalidAccessCode'));
       }
     } catch (err) {
-      setJoinError('Có lỗi xảy ra khi tìm sự kiện');
+      setJoinError(t('home.errorFindingEvent'));
       console.error(err);
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
-      <ThemeToggle />
+      <HeaderControls />
       <div className="max-w-4xl mx-auto px-4">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-800 dark:text-gray-100 mb-2">Split Bill</h1>
-          <p className="text-gray-600 dark:text-gray-400">Group money sharing app designed by Grok</p>
+          <h1 className="text-4xl font-bold text-gray-800 dark:text-gray-100 mb-2">{t('home.title')}</h1>
+          <p className="text-gray-600 dark:text-gray-400">{t('home.subtitle')}</p>
         </div>
 
         {!showForm && !showJoinForm && (
@@ -54,7 +56,7 @@ export default function HomePage() {
               }}
               className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium shadow-md"
             >
-              Tạo sự kiện mới
+              {t('home.createEvent')}
             </button>
             <button
               onClick={() => {
@@ -63,18 +65,18 @@ export default function HomePage() {
               }}
               className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium shadow-md"
             >
-              Tham gia sự kiện
+              {t('home.joinEvent')}
             </button>
           </div>
         )}
 
         {showJoinForm && (
           <div className="max-w-md mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-            <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-100">Tham gia sự kiện</h2>
+            <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-100">{t('home.joinEventTitle')}</h2>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Mã truy cập
+                  {t('home.accessCode')}
                 </label>
                 <input
                   type="text"
@@ -84,7 +86,7 @@ export default function HomePage() {
                     setJoinError('');
                   }}
                   className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent uppercase"
-                  placeholder="Nhập mã truy cập (ví dụ: ABC123)"
+                  placeholder={t('home.accessCodePlaceholder')}
                   maxLength={6}
                 />
               </div>
@@ -98,7 +100,7 @@ export default function HomePage() {
                   onClick={handleJoinEvent}
                   className="flex-1 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
                 >
-                  Tham gia
+                  {t('home.join')}
                 </button>
                 <button
                   onClick={() => {
@@ -108,7 +110,7 @@ export default function HomePage() {
                   }}
                   className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600"
                 >
-                  Hủy
+                  {t('common.cancel')}
                 </button>
               </div>
             </div>
@@ -123,7 +125,7 @@ export default function HomePage() {
               }}
               className="mb-4 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600"
             >
-              ← Quay lại
+              ← {t('common.goBack')}
             </button>
             <EventForm onSuccess={handleEventCreated} />
           </div>

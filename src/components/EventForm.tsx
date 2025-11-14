@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { createEvent } from '../services/eventService';
 import { useNavigate } from 'react-router-dom';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface EventFormProps {
   onSuccess?: (eventId: string, accessCode: string) => void;
@@ -8,6 +9,7 @@ interface EventFormProps {
 
 export default function EventForm({ onSuccess }: EventFormProps) {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [eventName, setEventName] = useState('');
   const [members, setMembers] = useState<string[]>(['']);
   const [hasFund, setHasFund] = useState(false);
@@ -122,12 +124,12 @@ export default function EventForm({ onSuccess }: EventFormProps) {
     
     // Validation
     if (!eventName.trim()) {
-      setError('Vui lòng nhập tên sự kiện');
+      setError(t('eventForm.pleaseEnterEventName'));
       return;
     }
     
     if (!createdBy.trim()) {
-      setError('Vui lòng nhập tên người tạo');
+      setError(t('eventForm.pleaseEnterCreatorName'));
       return;
     }
     
@@ -140,7 +142,7 @@ export default function EventForm({ onSuccess }: EventFormProps) {
     }
     
     if (validMembers.length < 2) {
-      setError('Cần ít nhất 2 thành viên (bao gồm người tạo)');
+      setError(t('eventForm.needAtLeast2Members'));
       return;
     }
 
@@ -157,7 +159,7 @@ export default function EventForm({ onSuccess }: EventFormProps) {
         (member) => finalFundContributions![member] !== undefined && finalFundContributions![member] > 0
       );
       if (!allMembersHaveFund) {
-        setError('Vui lòng nhập số tiền quỹ cho tất cả thành viên');
+        setError(t('eventForm.pleaseEnterFundAmount'));
         return;
       }
     }
@@ -188,7 +190,7 @@ export default function EventForm({ onSuccess }: EventFormProps) {
     } catch (err) {
       console.log(err,'err');
       
-      setError('Có lỗi xảy ra khi tạo sự kiện');
+      setError(t('eventForm.errorCreatingEvent'));
       console.error(err);
     } finally {
       setLoading(false);
@@ -197,40 +199,40 @@ export default function EventForm({ onSuccess }: EventFormProps) {
 
   return (
     <div className="max-w-2xl mx-auto p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-100">Tạo sự kiện mới</h2>
+      <h2 className="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-100">{t('eventForm.createNewEvent')}</h2>
       
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Tên người tạo *
+            {t('eventForm.creatorName')} *
           </label>
           <input
             type="text"
             value={createdBy}
             onChange={(e) => handleCreatorNameChange(e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="Nhập tên của bạn"
+            placeholder={t('eventForm.creatorNamePlaceholder')}
             required
           />
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Tên sự kiện *
+            {t('eventForm.eventName')} *
           </label>
           <input
             type="text"
             value={eventName}
             onChange={(e) => setEventName(e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="Ví dụ: Chuyến đi Vũng Tàu 3N2Đ"
+            placeholder={t('eventForm.eventNamePlaceholder')}
             required
           />
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Thành viên *
+            {t('eventForm.members')} *
           </label>
           {members.map((member, index) => (
             <div key={index} className="flex gap-2 mb-2">
@@ -239,7 +241,7 @@ export default function EventForm({ onSuccess }: EventFormProps) {
                 value={member}
                 onChange={(e) => handleMemberChange(index, e.target.value)}
                 className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder={index === 0 ? "Người tạo (tự động điền)" : `Thành viên ${index}`}
+                placeholder={index === 0 ? t('eventForm.creatorPlaceholder') : `${t('eventForm.memberPlaceholder')} ${index}`}
               />
               {members.length > 1 && index !== 0 && (
                 <button
@@ -247,7 +249,7 @@ export default function EventForm({ onSuccess }: EventFormProps) {
                   onClick={() => handleRemoveMember(index)}
                   className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
                 >
-                  Xóa
+                  {t('common.delete')}
                 </button>
               )}
             </div>
@@ -257,7 +259,7 @@ export default function EventForm({ onSuccess }: EventFormProps) {
             onClick={handleAddMember}
             className="mt-2 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600"
           >
-            + Thêm thành viên
+            + {t('eventForm.addMember')}
           </button>
         </div>
 
@@ -287,13 +289,13 @@ export default function EventForm({ onSuccess }: EventFormProps) {
             className="mr-2"
           />
           <label htmlFor="hasFund" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-            Tạo quỹ chung cho chuyến đi
+            {t('eventForm.createFund')}
           </label>
         </div>
 
         {hasFund && (
           <div className="ml-6 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-md">
-            <h3 className="font-medium text-gray-700 dark:text-gray-300 mb-3">Số tiền mỗi người nộp vào quỹ:</h3>
+            <h3 className="font-medium text-gray-700 dark:text-gray-300 mb-3">{t('eventForm.fundAmountPerPerson')}</h3>
             {members
               .filter((m) => m.trim() !== '')
               .map((member, index) => (
@@ -322,7 +324,7 @@ export default function EventForm({ onSuccess }: EventFormProps) {
           disabled={loading}
           className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
         >
-          {loading ? 'Đang tạo...' : 'Tạo sự kiện'}
+          {loading ? t('eventForm.creating') : t('eventForm.createEvent')}
         </button>
       </form>
     </div>
